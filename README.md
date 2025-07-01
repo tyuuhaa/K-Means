@@ -1,4 +1,4 @@
-# Clustering Website Topup Game
+# K-Means Clustering untuk Segmentasi Pelanggan Website Top-Up
 Website top-up game menjual berbagai macam item seperti diamond, skin, dan battle pass dari beberapa game populer. Namun, pihak manajemen ingin mengoptimalkan strategi pemasaran dengan cara mengelompokkan pelanggan berdasarkan pola belanja mereka.
 
 # Tujuan
