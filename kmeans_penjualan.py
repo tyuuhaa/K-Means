@@ -8,10 +8,8 @@ from sklearn.preprocessing import StandardScaler
 
 # 2. Load Dataset
 df = pd.read_csv("penjualan_topup.csv")
-print("Data Awal:")
-print(df.head())
 
-# 3. Pilih Fitur yang Akan Digunakan
+# 3. Pilih Fitur untuk Clustering
 fitur = ["TotalTransaksi", "TotalPengeluaran", "RataKunjunganPerBulan"]
 X = df[fitur]
 
@@ -19,41 +17,58 @@ X = df[fitur]
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# 5. Jalankan K-Means Clustering
+# 5. Jalankan K-Means Clustering (4 cluster)
 kmeans = KMeans(n_clusters=4, random_state=42)
 df["Cluster"] = kmeans.fit_predict(X_scaled)
 
-# 6. Visualisasi Cluster (2D: TotalTransaksi vs TotalPengeluaran)
+# 6. Hitung Rata-Rata Tiap Cluster
+cluster_summary = df.groupby("Cluster")[fitur].mean().round(0).astype(int)
+
+# 7. Skoring dan Penentuan Label Final
+cluster_summary["Skor"] = cluster_summary["TotalTransaksi"] + \
+                          cluster_summary["TotalPengeluaran"] / 100000 + \
+                          cluster_summary["RataKunjunganPerBulan"]
+
+# Urutkan cluster berdasarkan skor total
+cluster_sorted = cluster_summary.sort_values("Skor")
+
+# Label final berurutan
+label_urut = ["Pembeli Baru", "Pembeli Musiman", "Pembeli Setia", "Pembeli Besar"]
+cluster_sorted["LabelFinal"] = label_urut
+
+# Buat mapping dari Cluster ke LabelFinal
+label_mapping = cluster_sorted["LabelFinal"].to_dict()
+df["LabelCluster"] = df["Cluster"].map(label_mapping)
+
+# 8. Visualisasi
 plt.figure(figsize=(10, 6))
 
-# Warna & Label Cluster
-warna = ["red", "blue", "green", "purple"]
-label_cluster = ["Pembeli Baru", "Pembeli Setia", "Pembeli Musiman", "Pembeli Besar"]
+# Warna sesuai urutan label
+label_to_color = {
+    "Pembeli Baru": "blue",
+    "Pembeli Musiman": "purple",
+    "Pembeli Setia": "green",
+    "Pembeli Besar": "red"
+}
 
-for i in range(4):
+# Tampilkan scatter plot berdasarkan label yang sudah ditetapkan
+for label in label_urut:  # urutan: Baru, Musiman, Setia, Besar
+    subset = df[df["LabelCluster"] == label]
     plt.scatter(
-        X_scaled[df["Cluster"] == i, 0],
-        X_scaled[df["Cluster"] == i, 1],
+        subset["TotalTransaksi"],
+        subset["TotalPengeluaran"],
         s=100,
-        c=warna[i],
-        label=f"Cluster {i} - {label_cluster[i]}"
+        c=label_to_color[label],
+        label=label
     )
 
 plt.title("Visualisasi Cluster Pelanggan Top-Up")
-plt.xlabel("Total Transaksi (scaled)")
-plt.ylabel("Total Pengeluaran (scaled)")
+plt.xlabel("Total Transaksi")
+plt.ylabel("Total Pengeluaran")
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-# 7. Tampilkan Hasil Cluster
-print("\nHasil Cluster:")
-print(df[["CustomerID"] + fitur + ["Cluster"]])
-
-# 8. Ringkasan Setiap Cluster
-print("\nRata-Rata Setiap Cluster:")
-print(df.groupby("Cluster")[fitur].mean())
-
-# 9. Simpan ke File Baru (opsional)
+# 9. Simpan hasil lengkap
 df.to_csv("hasil_cluster_penjualan.csv", index=False)
