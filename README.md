@@ -7,7 +7,4 @@ Website top-up game menjual berbagai macam item seperti diamond, skin, dan battl
 Tujuan:
 Menggunakan metode K-Means Clustering untuk mengelompokkan pelanggan berdasarkan jumlah transaksi, total pengeluaran, dan frekuensi kunjungan, agar dapat mengetahui segmen pembeli seperti:
 
-Pembeli Setia (Loyal)
-Pembeli Musiman
-Pembeli Besar (High spender)
-Pembeli Baru
+Pembeli Setia (Loyal)\nPembeli Musiman\nPembeli Besar (High spender)\nPembeli Baru
